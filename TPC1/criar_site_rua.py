@@ -3,9 +3,7 @@ import os
 import sys
 
 def make_path(path):
-    p = './MapaRuas-materialBase' + path[2:]
-    print(p)
-    return p
+    return '../MapaRuas-materialBase' + path[2:]
 
 index_html = html="""
 <!DOCTYPE html>
@@ -46,7 +44,7 @@ for root, dirs, files in os.walk('./MapaRuas-materialBase/texto'):
                                 html += f'<label>{figura_child.text}</label>'
 
                     elif child.tag == 'para':
-                        html += f'<p>{child.text}</p>'
+                        html += f'<p>{"".join(child.itertext())}</p>'
 
                     elif child.tag == 'lista-casas':
                         html += '<ol>'
