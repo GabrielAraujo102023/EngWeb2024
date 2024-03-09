@@ -13,7 +13,7 @@ exports.compositoresListPage = function(slist, d){
 
                 <header class="w3-container w3-green">
                     <h1>Composers List
-                    <a class="w3-btn w3-round w3-grey" href="/alunos/registo">+</a>
+                    <a class="w3-btn w3-round w3-grey" href="/compositores/registo">+</a>
                     </h1>
                     
                 </header>
@@ -33,7 +33,7 @@ exports.compositoresListPage = function(slist, d){
                             ${slist[i].nome}
                         </a>
                     </td>
-                    <td><a href="/periodo/${slist[i].periodo}">${slist[i].periodo}</a></td>
+                    <td><a href="/periodos/${slist[i].periodo}">${slist[i].periodo}</a></td>
                     <td>
                     [<a href="/compositores/edit/${slist[i].id}">Edit</a>][<a href="/compositores/delete/${slist[i].id}">Delete</a>]
                 </td>

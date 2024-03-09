@@ -36,7 +36,7 @@ var alunosServer = http.createServer((req, res) => {
         switch(req.method){
             case "GET": 
                 // GET /compositores --------------------------------------------------------------------
-                if (req.url == '/' || req.url == '/alunos')
+                if (req.url == '/' || req.url == '/compositores')
                 {
                     axios.get('http://localhost:3000/compositores?_sort=nome')
                     .then(dados => {
@@ -46,11 +46,16 @@ var alunosServer = http.createServer((req, res) => {
                         res.end()
                     })
                     .catch(erro => {
-                        res.writeHead(501, {'Content-type' : 'text/html;charset=utf-8'})
                         res.write('<p>Não foi possível obter a lista decompositores<p/>')
                         res.write('<p>' + erro + '<p/>')
                         res.end()
                     })
+                }
+                else if (req.url == '/compositores/registo')
+                {
+                        res.writeHead(200, {'Content-Type' : 'text/html;charset=utf-8'})
+                        res.write(templates.compositoresFormPage(d))
+                        res.end()
                 }
                 // GET /compositores/:id --------------------------------------------------------------------
                 else if (req.url.match(/\/compositores\/C[0-9]+$/i))
@@ -103,21 +108,36 @@ var alunosServer = http.createServer((req, res) => {
                         res.end()
                     })
                 }
-                else if (req.url.match(/\/periodos\/[0-9]+$/i))
-                {
-                    axios.get('http://localhost:3000/periodos?id=' + req.url.substring(10))
-                    .then(dados => {
-                        var periodos = dados.data
-                        res.writeHead(200, {'Content-Type' : 'text/json;charset=utf-8'})
-                        res.write(JSON.stringify(periodos))
-                        res.end()
-                    })
-                    .catch(erro => {
-                        res.writeHead(501, {'Content-type' : 'text/html;charset=utf-8'})
-                        res.write('<p>Não foi possível obter a lista de compositores<p/>')
-                        res.write('<p>' + erro + '<p/>')
-                        res.end()
-                    })
+                else if (req.url.match(/\/periodos\/\w+$/i)) {
+                    axios.get('http://localhost:3000/periodos?nome=' + req.url.substring(10))
+                        .then(periodoRes => {
+                            var periodo = periodoRes.data[0];
+                            res.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
+                            res.write('<h1>' + periodo.nome + '</h1>');
+                            res.write('<ul>');
+                
+                            axios.get('http://localhost:3000/compositores?periodo=' + periodo.nome)
+                                .then(compositoresRes => {
+                                    var compositores = compositoresRes.data;
+                                    compositores.forEach(compositor => {
+                                        res.write('<li>' + compositor.nome + '</li>');
+                                    });
+                                    res.write('</ul>');
+                                    res.end();
+                                })
+                                .catch(compositoresErro => {
+                                    res.writeHead(501, {'Content-Type': 'text/html;charset=utf-8'});
+                                    res.write('<p>Não foi possível obter a lista de compositores</p>');
+                                    res.write('<p>' + compositoresErro + '</p>');
+                                    res.end();
+                                });
+                        })
+                        .catch(periodoErro => {
+                            res.writeHead(501, {'Content-Type': 'text/html;charset=utf-8'});
+                            res.write('<p>Não foi possível obter o período</p>');
+                            res.write('<p>' + periodoErro + '</p>');
+                            res.end();
+                        });
                 }
                 // GET /compositores/delete/:id --------------------------------------------------------------------
                 else if (/\/compositores\/delete\/C[0-9]+$/i.test(req.url))
@@ -150,6 +170,28 @@ var alunosServer = http.createServer((req, res) => {
                                 res.write('<p>Não foi possível obter os dados do body<p/>')
                                 res.write('<p>' + erro + '<p/>')
                                 res.end()
+                            })
+                            console.log(result)
+                            axios.get('http://localhost:3000/periodos/' + result.periodo)
+                            .then(pD => {
+                                var perD = pD.data
+                                    axios.put('http://localhost:3000/periodos/' + perD.nome, {nome: perD.nome, compositores: perD.compositor + [result.id]})
+                                    .catch(erro => {
+                                        res.writeHead(501, {'Content-type' : 'text/html;charset=utf-8'})
+                                        res.write('<p>Não foi possível obter os dados do body<p/>')
+                                        res.write('<p>' + erro + '<p/>')
+                                        res.end()
+                                    })
+                                
+                            })
+                            .catch(erro => {
+                                axios.post('http://localhost:3000/periodos/', {nome: result.periodo, compositores:[result.id]})
+                                    .catch(erro => {
+                                        res.writeHead(501, {'Content-type' : 'text/html;charset=utf-8'})
+                                        res.write('<p>Não foi possível obter os dados do body<p/>')
+                                        res.write('<p>' + erro + '<p/>')
+                                        res.end()
+                                    })
                             })
                         }
                         else
