@@ -79,7 +79,7 @@ http.createServer((req, res) => {
                     if (d.data[i].genres.length > 0) {
                         res.write('<p>Genres:</p>')
                         for (j in d.data[i].genres) {
-                            res.write('<p>  <a href="/actors/' + d.data[i].genres[j] + '">' + d.data[i].genres[j] + '</a></p>')
+                            res.write('<p>  <a href="/genres/' + d.data[i].genres[j] + '">' + d.data[i].genres[j] + '</a></p>')
                         }
                     }
                 }
@@ -105,12 +105,11 @@ http.createServer((req, res) => {
                     .then(d => {
                         res.write('<p>Movies with this actor:</p>')
                         console.log(actor)
+                        let ac = decodeURIComponent(actor)
                         for (i in d.data) {
-                            if (d.data[i].actors && d.data[i].actors.length > 0) {
-                                for (j in d.data[i].actors) {
-                                    if (d.data[i].actors[j] == actor) {
-                                        res.write('<p>  <a href="/movies/' + d.data[i].id + '">' + d.data[i].title + '</a></p>')
-                                    }
+                            if (d.data[i].cast && d.data[i].cast.length > 0) {
+                                if (d.data[i].cast.includes(ac)) {
+                                    res.write('<p>  <a href="/movies/' + d.data[i].id + '">' + d.data[i].title + '</a></p>')
                                 }
                             }
                         }
@@ -143,7 +142,7 @@ http.createServer((req, res) => {
                         for (i in d.data) {
                             if (d.data[i].genres && d.data[i].genres.length > 0) {
                                 for (j in d.data[i].genres) {
-                                    if (d.data[i].genres[j] == genre) {
+                                    if (d.data[i].genres[j] === genre) {
                                         res.write('<p>  <a href="/movies/' + d.data[i].id + '">' + d.data[i].title + '</a></p>')
                                     }
                                 }
